@@ -199,7 +199,10 @@ impl Gestures {
         let well_formed = (8..=128).contains(&client_token.len())
             && client_token.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_');
         self.client_seen.retain(|_, at| *at + GESTURE_TTL > now);
-        if !well_formed || self.client_seen.contains_key(client_token) || self.client_seen.len() >= MAX_GESTURES {
+        if !well_formed
+            || self.client_seen.contains_key(client_token)
+            || self.client_seen.len() >= MAX_GESTURES
+        {
             return None;
         }
         self.client_seen.insert(client_token.to_string(), now);

@@ -52,9 +52,9 @@ impl Supervisor {
             match self.prepare_run(&inner, app, op, origin) {
                 Err(error) => vec![Out::Respond(respond, Err(error))],
                 Ok((key, export)) => {
-                    let gesture = gesture
-                        .filter(|_| origin == Origin::User)
-                        .and_then(|token| inner.gestures.accept_client(app, &token, Instant::now()));
+                    let gesture = gesture.filter(|_| origin == Origin::User).and_then(|token| {
+                        inner.gestures.accept_client(app, &token, Instant::now())
+                    });
                     let message = ToHost::Run { cb: 0, export, args, gesture };
                     self.start_run_locked(&mut inner, &key, message, respond)
                 }

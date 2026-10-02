@@ -122,7 +122,7 @@ impl OpRouter for MuxRouter {
         let response = crate::actor::scoped(actor, || {
             resource_router::handle_parsed_resource_request(&mux, parsed)
         })
-            .map_err(|e| answer(op, json!({ "ok": false, "error": e })).unwrap_err())?;
+        .map_err(|e| answer(op, json!({ "ok": false, "error": e })).unwrap_err())?;
         answer(op, response)
     }
 

@@ -92,7 +92,10 @@ fn scripted_app_host() {
                     std::process::exit(70);
                 }
                 if let Some(gesture) = gesture {
-                    send(FromHost::Log { level: "info".into(), message: format!("gesture {gesture}") });
+                    send(FromHost::Log {
+                        level: "info".into(),
+                        message: format!("gesture {gesture}"),
+                    });
                 }
                 send(FromHost::Log { level: "info".into(), message: format!("run {export}") });
                 send(FromHost::Done { cb, ok: true, body: json!({ "value": export }) });
@@ -664,7 +667,9 @@ fn palette_runs_get_one_supervisor_gesture_per_client_token() {
         .as_array()
         .unwrap()
         .iter()
-        .filter_map(|l| l["message"].as_str().and_then(|m| m.strip_prefix("gesture ")).map(str::to_string))
+        .filter_map(|l| {
+            l["message"].as_str().and_then(|m| m.strip_prefix("gesture ")).map(str::to_string)
+        })
         .collect();
     assert_eq!(gestures.len(), 1, "only the first user invocation of a token: {gestures:?}");
     assert!(gestures[0].starts_with("g_"), "the host sees a supervisor token, never the client's");

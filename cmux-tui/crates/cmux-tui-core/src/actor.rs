@@ -86,7 +86,9 @@ mod tests {
         assert_eq!(mutation_origin(), UNSCOPED_ORIGIN);
         scoped(Actor::User, || {
             assert_eq!(mutation_origin(), "user");
-            scoped(Actor::App("cmux/demo".into()), || assert_eq!(mutation_origin(), "app:cmux/demo"));
+            scoped(Actor::App("cmux/demo".into()), || {
+                assert_eq!(mutation_origin(), "app:cmux/demo")
+            });
             assert_eq!(mutation_origin(), "user");
         });
         let _ = std::panic::catch_unwind(|| scoped(Actor::Agent("a1".into()), || panic!("boom")));

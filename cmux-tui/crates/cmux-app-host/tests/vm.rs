@@ -293,21 +293,23 @@ mod apps {
         assert_eq!(h.vm.pending_calls(), 1);
     }
 
-#[test]
-fn a_run_with_a_gesture_carries_it_to_synchronous_calls_only() {
-    let mut h = Harness::new(&app(
-        r#"return { focusTab: async (args, ctx) => {
+    #[test]
+    fn a_run_with_a_gesture_carries_it_to_synchronous_calls_only() {
+        let mut h = Harness::new(&app(r#"return { focusTab: async (args, ctx) => {
             globalThis.seen = ctx.gesture
             await cmux.tab.focus({ tab: args.tab })
             await cmux.tab.focus({ tab: "later" })
-        } }"#,
-    ));
-    h.handle("tab.focus", |_, _| (true, json!({ "value": null })));
-    h.vm.run_command(3, "focusTab", &json!({ "tab": "tab_1" }), Some("g9")).expect("run");
-    h.pump().expect("pump");
-    let gestures: Vec<Value> = h.calls.iter().map(|c| c.options.get("gesture").cloned().unwrap_or(Value::Null)).collect();
-    assert_eq!(gestures, vec![json!("g9"), Value::Null]);
-    assert_eq!(h.eval("globalThis.seen"), json!("g9"));
-    assert_eq!(h.done[&3].0, true);
-}
+        } }"#));
+        h.handle("tab.focus", |_, _| (true, json!({ "value": null })));
+        h.vm.run_command(3, "focusTab", &json!({ "tab": "tab_1" }), Some("g9")).expect("run");
+        h.pump().expect("pump");
+        let gestures: Vec<Value> = h
+            .calls
+            .iter()
+            .map(|c| c.options.get("gesture").cloned().unwrap_or(Value::Null))
+            .collect();
+        assert_eq!(gestures, vec![json!("g9"), Value::Null]);
+        assert_eq!(h.eval("globalThis.seen"), json!("g9"));
+        assert!(h.done[&3].0);
+    }
 }

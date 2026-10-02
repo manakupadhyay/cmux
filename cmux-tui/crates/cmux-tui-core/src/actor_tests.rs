@@ -20,8 +20,10 @@ fn recorded_origin(mux: &Mux, key: &str) -> String {
     let dir = mux.session_state_directory().expect("persistent session");
     for entry in std::fs::read_dir(&dir).expect("state dir") {
         let path = entry.expect("entry").path();
-        let Ok(db) = rusqlite::Connection::open_with_flags(&path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
-        else {
+        let Ok(db) = rusqlite::Connection::open_with_flags(
+            &path,
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+        ) else {
             continue;
         };
         let found = db.query_row(
