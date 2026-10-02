@@ -67,9 +67,9 @@ fn a_caller_cannot_send_an_actor() {
         "operation": "workspace.list", "actor": "user",
         "params": { "machine": "current", "session": "current" },
     });
-    let error = crate::resource_router::parse_resource_request(&request.to_string())
-        .err()
-        .expect("an envelope with actor is refused");
+    let Err(error) = crate::resource_router::parse_resource_request(&request.to_string()) else {
+        panic!("an envelope with actor is refused");
+    };
     assert_eq!(error.code, "validation.invalid");
     let mut without = request;
     without.as_object_mut().unwrap().remove("actor");

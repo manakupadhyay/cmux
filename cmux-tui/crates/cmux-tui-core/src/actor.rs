@@ -87,7 +87,7 @@ mod tests {
         scoped(Actor::User, || {
             assert_eq!(mutation_origin(), "user");
             scoped(Actor::App("cmux/demo".into()), || {
-                assert_eq!(mutation_origin(), "app:cmux/demo")
+                assert_eq!(mutation_origin(), "app:cmux/demo");
             });
             assert_eq!(mutation_origin(), "user");
         });
