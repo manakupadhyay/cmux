@@ -149,6 +149,7 @@ final class WindowManager {
     /// Creates a workspace only when the daemon tree is empty.
     func restoreWhenLoaded() {
         if controllers.isEmpty, !showLaunchSnapshot() {
+            DebugTimings.markLaunch("launch_window.connecting_state")
             let id = UUID().uuidString.lowercased()
             launchWindowID = id
             makeController(for: WindowRegistry.Window(id: id))
@@ -171,6 +172,7 @@ final class WindowManager {
         if let windowState = services.daemon.windowState {
             document = (try? await windowState.load()) ?? WindowStateDocument()
         }
+        DebugTimings.markLaunch("restore.window_state_loaded")
         // Incognito workspaces a crashed run left: closed, never shown.
         let leftover = await incognitoLedger.load()
         if !leftover.isEmpty {
@@ -206,6 +208,7 @@ final class WindowManager {
         if let adopted, controllers.count > 1 { present(adopted) }
         observeMembership()
         sessionRegistrar.start()
+        DebugTimings.markLaunch("restore.end")
     }
 
     /// The launch window takes the frontmost saved window's identity and
@@ -290,6 +293,7 @@ final class WindowManager {
         // no-activate behind the others (in front on a test screen), never key.
         let behind = behindWindows.remove(controller.state.id) != nil
         if ordersWindowsIn, let window = controller.window { WindowActivation.show(window, behind ? .presentBehind : .present) }
+        DebugTimings.markLaunch("window.first_presented")
         onPresent?(controller)
     }
 

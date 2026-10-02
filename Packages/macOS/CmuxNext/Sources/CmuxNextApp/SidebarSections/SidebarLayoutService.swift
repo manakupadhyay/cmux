@@ -132,7 +132,9 @@ final class SidebarLayoutService {
         guard let remote else { return }
         // task-owner: one sidebar_layout.get
         Task { [weak self] in
+            DebugTimings.markLaunch("sidebar_layout.get_start")
             guard let confirmed = try? await remote.get() else { return }
+            DebugTimings.markLaunch("sidebar_layout.get_end")
             self?.adopt(confirmed)
             self?.recompute()
         }

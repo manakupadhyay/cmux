@@ -1,6 +1,7 @@
 import AppKit
 import CmuxNextPalette
 import CmuxNextSettings
+import CmuxNextSidebar
 import CmuxNextTerminal
 import class CmuxNextDaemon.DaemonLaunchTimings
 import Darwin
@@ -17,6 +18,7 @@ enum DebugTimings {
     static let signposter = OSSignposter(subsystem: "com.cmuxterm.app.next", category: "stalls")
 
     /// Launch marks from any thread (the daemon start path runs off main).
+    private nonisolated static let launchLogger = Logger(subsystem: "com.cmuxterm.app.next", category: "launch")
     private nonisolated static let launchMarks = Mutex<[(name: String, ms: Double)]>([])
     private static var paletteOpens: [PaletteOpenTiming] = []
     private static var surfaces: [Double] = []
@@ -50,11 +52,16 @@ enum DebugTimings {
             marks.append((name, ms))
             return true
         }
-        if first { LaunchMarkSink.shared.write(name: name, ms: ms) }
+        if first {
+            LaunchMarkSink.shared.write(name: name, ms: ms)
+            launchLogger.info("launch mark \(name, privacy: .public) \(String(format: "%.1f", ms), privacy: .public)")
+        }
     }
 
     static func install() {
         DaemonLaunchTimings.shared.install { markLaunch($0, at: $1) }
+        // MEASUREMENT ONLY: sidebar row views (CmuxNextSidebar).
+        SidebarLaunchProbe.mark = { markLaunch($0) }
         TerminalTimings.onSurfaceCreated = { duration in
             let ms = milliseconds(duration)
             if surfaces.count < capacity { surfaces.append(ms) }

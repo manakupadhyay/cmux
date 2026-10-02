@@ -209,6 +209,7 @@ final class SidebarListView: NSView {
                 }
                 addSubview(view, positioned: .above, relativeTo: decorations)
                 rowViews[row.key] = view
+                SidebarLaunchProbe.rowRealized(row.key)
             }
             if suppressed.contains(row.key) {
                 view.frame = target
@@ -331,6 +332,7 @@ final class SidebarListView: NSView {
             view.alphaValue = suppressed.contains(row.key) ? 0 : 1
             addSubview(view, positioned: .above, relativeTo: decorations)
             rowViews[row.key] = view
+            SidebarLaunchProbe.rowRealized(row.key)
         }
         pruneOffscreen()
         updateHover()

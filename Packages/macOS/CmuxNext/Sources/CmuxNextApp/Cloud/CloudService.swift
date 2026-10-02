@@ -107,6 +107,7 @@ final class CloudService {
             lastError = nil
             reconcile(list)
             hasLoadedMachines = true
+            DebugTimings.markLaunch("cloud.machines_loaded")
         } catch {
             lastError = String(describing: error)
             logger.error("machine list failed: \(String(describing: error), privacy: .public)")

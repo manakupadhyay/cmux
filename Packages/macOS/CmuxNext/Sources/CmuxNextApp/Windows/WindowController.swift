@@ -162,6 +162,7 @@ final class WindowController: NSWindowController, NSWindowDelegate {
     /// connection, until a workspace can be shown.
     private func showConnecting() {
         let view = connectingView ?? DaemonConnectingView(frame: .zero)
+        DebugTimings.markLaunch("content.connecting_view_shown")
         connectingView = view
         root.show(view)
         themeScope.show(nil)
@@ -195,6 +196,8 @@ final class WindowController: NSWindowController, NSWindowDelegate {
             controller = WorkspaceContentController(workspace: workspace, daemon: daemon, services: services, state: state)
         }
         content = controller
+        DebugTimings.markLaunch(daemon.store.isProvisional ? "content.first_workspace_shown_provisional" : "content.first_workspace_shown_live")
+        DebugTimings.markLaunch("content.first_workspace_shown")
         // One synchronous swap: the old view leaves (its panes stay mounted,
         // paused) and the new one draws in the same frame.
         root.show(controller.contentView)

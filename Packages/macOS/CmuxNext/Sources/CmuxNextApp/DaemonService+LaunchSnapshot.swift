@@ -12,8 +12,16 @@ extension DaemonService {
     /// at 8 MiB) and local, and reading it replaces waiting for the daemon,
     /// so it is read before the first window.
     func showLaunchSnapshot(session: String) {
-        guard let path = launchSnapshotLocation.path(session: session),
-              let snapshot = LaunchSnapshot.load(path: path, session: session) else { return }
+        DebugTimings.markLaunch("launch_snapshot.read_start")
+        guard let path = launchSnapshotLocation.path(session: session) else {
+            DebugTimings.markLaunch("launch_snapshot.no_remembered_path")
+            return
+        }
+        guard let snapshot = LaunchSnapshot.load(path: path, session: session) else {
+            DebugTimings.markLaunch("launch_snapshot.unreadable_or_missing")
+            return
+        }
+        if snapshot.windows == nil { DebugTimings.markLaunch("launch_snapshot.no_window_records") }
         store.applyProvisional(snapshot: snapshot.tree)
         launchSnapshotWindows = snapshot.windows
         DebugTimings.markLaunch("launch_snapshot_applied")

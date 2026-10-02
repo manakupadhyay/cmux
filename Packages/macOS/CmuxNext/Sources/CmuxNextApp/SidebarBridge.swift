@@ -42,6 +42,7 @@ final class SidebarBridge {
             guard byKeyboard, let focus = state?.focus else { return }
             focus.send(.focusTarget(.content, source: .keyboard))
         }
+        DebugTimings.markLaunch("sidebar.model_created")
         observe()
         observeSections()
     }
@@ -66,6 +67,14 @@ final class SidebarBridge {
             }) {
                 guard let self, self.model.sections != sections else { continue }
                 self.model.sections = sections
+                // MEASUREMENT ONLY
+                let store = self.services.daemon.store
+                DebugTimings.markLaunch("sidebar.first_sections")
+                if sections.contains(where: { !$0.workspaces.isEmpty }) {
+                    DebugTimings.markLaunch("sidebar.first_nonempty_model")
+                    DebugTimings.markLaunch(store.isProvisional ? "sidebar.first_nonempty_model_provisional"
+                                            : store.isLoaded ? "sidebar.first_nonempty_model_live" : "sidebar.first_nonempty_model_other")
+                }
             }
         }
         profileObservation = Task { [weak self] in

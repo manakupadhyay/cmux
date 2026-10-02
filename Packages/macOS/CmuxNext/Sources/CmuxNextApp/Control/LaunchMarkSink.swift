@@ -12,12 +12,20 @@ nonisolated struct LaunchMarkSink: Sendable {
     static let shared = LaunchMarkSink(environment: ProcessInfo.processInfo.environment)
 
     static let environmentKey = "CMUX_NEXT_LAUNCH_MARKS_FD"
+    /// MEASUREMENT ONLY: append marks to this file (for `open -n --env`).
+    static let fileKey = "CMUX_NEXT_LAUNCH_MARKS_FILE"
     private let fd: Int32?
 
     init(environment: [String: String]) {
         // Children (the daemon, terminals) must not inherit the variable:
         // its descriptor number means nothing to them.
         unsetenv(Self.environmentKey)
+        unsetenv(Self.fileKey)
+        if let path = environment[Self.fileKey], !path.isEmpty {
+            let fd = open(path, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC | O_NONBLOCK, 0o644)
+            self.fd = fd >= 0 ? fd : nil
+            return
+        }
         guard let text = environment[Self.environmentKey], let fd = Int32(text), fd > 2,
               fcntl(fd, F_GETFD) != -1 else {
             self.fd = nil

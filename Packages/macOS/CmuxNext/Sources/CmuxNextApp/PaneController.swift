@@ -175,7 +175,13 @@ final class PaneController: SurfacePresenter, PresentablePane {
     func apply(_ snapshot: Snapshot, force: Bool = false) {
         if force { view.stripView.discardPendingReorder() }
         if stripModel.groups != snapshot.groups { stripModel.groups = snapshot.groups }
-        if stripModel.tabs != snapshot.items { stripModel.tabs = snapshot.items }
+        if stripModel.tabs != snapshot.items {
+            stripModel.tabs = snapshot.items
+            if !snapshot.items.isEmpty {
+                DebugTimings.markLaunch("tabs.first_strip_items")
+                DebugTimings.markLaunch(daemon.store.isProvisional ? "tabs.first_strip_items_provisional" : "tabs.first_strip_items_live")
+            }
+        }
         var selectNew = false
         if let pending = pendingSelectSurface, let tab = pane.tabs.first(where: { $0.surface == pending }) {
             state?.selection.select(tab.id, in: paneKey)
