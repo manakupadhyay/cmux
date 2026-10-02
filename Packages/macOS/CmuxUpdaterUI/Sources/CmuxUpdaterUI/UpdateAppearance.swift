@@ -52,7 +52,7 @@ public struct UpdateAppearance: Sendable {
         case .permissionRequest:
             return accentDarkened(by: 0.3)
         case .updateAvailable, .installing:
-            // A downloaded update waiting on the user (Update Ready, Restart to Update) is as
+            // A downloaded update waiting on the user (Update Ready) is as
             // actionable as an available one.
             return accent
         case .notFound:

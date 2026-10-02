@@ -318,9 +318,9 @@ final class UpdatePillUITests: XCTestCase {
         app.launchEnvironment["CMUX_UI_TEST_UPDATE_STATE"] = "installing"
         launchAndActivate(app)
 
-        let pill = pillButton(app: app, expectedLabel: "Restart to Update")
+        let pill = pillButton(app: app, expectedLabel: "Update Ready")
         XCTAssertTrue(pill.waitForExistence(timeout: 6.0))
-        XCTAssertEqual(pill.label, "Restart to Update")
+        XCTAssertEqual(pill.label, "Update Ready")
         assertVisibleSize(pill)
         attachScreenshot(name: "update-restart-to-complete")
 

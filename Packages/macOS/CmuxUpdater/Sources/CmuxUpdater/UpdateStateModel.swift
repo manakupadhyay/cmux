@@ -300,10 +300,9 @@ public final class UpdateStateModel {
             if install.relaunchBlockers != nil {
                 return String(localized: "update.readyWaiting", defaultValue: "Update Ready")
             }
-            // Sparkle has staged the update and only needs cmux to quit, so the pill names that
-            // action rather than claiming an install is still running. Short enough to fit
-            // beside the footer's other buttons.
-            return String(localized: "update.restartToUpdate", defaultValue: "Restart to Update")
+            // A staged update and a relaunch held by blockers are the same user-facing state:
+            // the update is ready and can be applied when the user chooses.
+            return String(localized: "update.readyWaiting", defaultValue: "Update Ready")
         case .notFound:
             return String(localized: "update.noUpdates.title", defaultValue: "No Updates Available")
         case .error(let err):
@@ -386,7 +385,7 @@ public final class UpdateStateModel {
             if let blockers = install.relaunchBlockers {
                 return Self.relaunchBlockersDescription(blockers, holdMode: install.holdMode)
             }
-            return String(localized: "update.restartToComplete", defaultValue: "Restart to Complete Update")
+            return String(localized: "update.readyWaiting", defaultValue: "Update Ready")
         case .notFound:
             return String(localized: "update.noUpdates.message", defaultValue: "You are running the latest version")
         case .error(let err):

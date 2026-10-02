@@ -29,7 +29,7 @@ public enum DebugUpdateStateScenario: String, CaseIterable, Hashable, Sendable {
         case .extracting:
             return String(localized: "update.debug.state.extracting", defaultValue: "Preparing")
         case .restartToUpdate:
-            return String(localized: "update.debug.state.restartToUpdate", defaultValue: "Restart to Update")
+            return String(localized: "update.readyWaiting", defaultValue: "Update Ready")
         case .readyNoAgents:
             return String(localized: "update.debug.state.readyNoAgents", defaultValue: "Update Ready: No Agents")
         case .readyAgentsWorking:

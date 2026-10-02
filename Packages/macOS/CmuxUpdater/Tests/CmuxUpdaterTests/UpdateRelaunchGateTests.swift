@@ -192,7 +192,7 @@ private final class CallCounter: @unchecked Sendable {
         _ = driver.handleShouldPostponeRelaunch(installHandler: { installs.count += 1 })
 
         installing?.dismiss()
-        #expect(model.text == "Restart to Update")
+        #expect(model.text == "Update Ready")
         #expect(!driver.relaunchGate.isWaiting)
 
         installing?.retryTerminatingApplication()
@@ -209,7 +209,7 @@ private final class CallCounter: @unchecked Sendable {
         })
 
         #expect(handled)
-        #expect(model.text == "Restart to Update")
+        #expect(model.text == "Update Ready")
         #expect(installs.count == 0)
 
         installing?.retryTerminatingApplication()
@@ -397,12 +397,12 @@ private final class CallCounter: @unchecked Sendable {
         #expect(!driver.relaunchGate.isWaiting)
         #expect(installing?.isAutoUpdate == true)
         #expect(installing?.relaunchBlockers == nil)
-        #expect(model.text == "Restart to Update")
+        #expect(model.text == "Update Ready")
 
         // Restart Later must not drop the postponed install: Sparkle's session stays open
         // until it runs, so the prompt stays and Restart Now still reaches it.
         installing?.dismiss()
-        #expect(model.text == "Restart to Update")
+        #expect(model.text == "Update Ready")
 
         // Restart Now is the user's choice: once nothing is risky it relaunches right away.
         host.blockers = blockers(care: 1)
