@@ -359,8 +359,15 @@ impl AppVm {
     }
 
     /// Runs a command export; the answer arrives as [`FromHost::Done`].
-    pub fn run_command(&mut self, cb: u64, export: &str, args: &Value) -> Result<(), VmError> {
-        let call = (export.to_string(), args.to_string(), cb as f64);
+    /// `gesture` is the token of the user invocation, if there was one.
+    pub fn run_command(
+        &mut self,
+        cb: u64,
+        export: &str,
+        args: &Value,
+        gesture: Option<&str>,
+    ) -> Result<(), VmError> {
+        let call = (export.to_string(), args.to_string(), cb as f64, gesture.map(str::to_string));
         self.entry_unit("command", move |ctx| {
             call_global::<_, ()>(ctx, "__cmuxAppRunCommand", call)
         })

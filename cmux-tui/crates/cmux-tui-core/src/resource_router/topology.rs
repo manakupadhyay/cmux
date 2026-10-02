@@ -420,7 +420,7 @@ fn result_id<'a>(
 fn mutation(envelope: &RequestEnvelope) -> Result<WorkspaceMutation, ResourceError> {
     WorkspaceMutation::new(
         envelope.idempotency_key.clone().expect("catalog-validated mutations have a key"),
-        "resource-api",
+        crate::actor::mutation_origin(),
     )
     .map_err(resource_operation_error)
 }

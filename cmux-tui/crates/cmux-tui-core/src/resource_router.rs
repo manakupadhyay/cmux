@@ -1438,7 +1438,7 @@ fn ack_notifications(mux: &Mux, request: ParsedResourceRequest) -> Result<Value,
             .idempotency_key
             .clone()
             .expect("catalog-validated mutations have an idempotency key"),
-        "resource-api",
+        crate::actor::mutation_origin(),
     )
     .map_err(resource_operation_error)?;
     let ack = mux
@@ -1469,7 +1469,7 @@ fn clear_notifications(mux: &Mux, request: ParsedResourceRequest) -> Result<Valu
             .idempotency_key
             .clone()
             .expect("catalog-validated mutations have an idempotency key"),
-        "resource-api",
+        crate::actor::mutation_origin(),
     )
     .map_err(resource_operation_error)?;
     let commit = mux

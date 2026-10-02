@@ -2,10 +2,10 @@
 //! dispatcher, the same validation and owner code every client goes
 //! through, and bridges daemon change events to app subscriptions.
 //!
-//! Gap: the protocol has no actor field yet, so `actor = app:<id>` and the
-//! call's origin are enforced here (scopes, gesture-gated focus ops) and not
-//! stamped on the owner's records. When the dispatcher grows an actor, pass
-//! `app` and `origin` through.
+//! Every routed call runs with actor `app:<id>` (crate::actor), which the
+//! owner records in the mutation's replay record. The call's origin (user
+//! when a gesture was spent) is enforced here: focus ops need it and a
+//! `focus` param is dropped without it; protocol-v2 has no origin field.
 
 use std::sync::{Arc, OnceLock, Weak};
 
@@ -98,7 +98,7 @@ pub(super) fn answer(op: &str, response: Value) -> Result<Value, Value> {
 impl OpRouter for MuxRouter {
     fn route(
         &self,
-        _app: &str,
+        app: &str,
         op: &str,
         params: Value,
         idempotency_key: Option<String>,
@@ -117,7 +117,11 @@ impl OpRouter for MuxRouter {
                 format!("{op} needs a client connection and is not available to apps"),
             ));
         }
-        let response = resource_router::handle_parsed_resource_request(&mux, parsed)
+        // The supervisor is the owner of this connection: it stamps the app.
+        let actor = crate::actor::Actor::App(app.to_string());
+        let response = crate::actor::scoped(actor, || {
+            resource_router::handle_parsed_resource_request(&mux, parsed)
+        })
             .map_err(|e| answer(op, json!({ "ok": false, "error": e })).unwrap_err())?;
         answer(op, response)
     }

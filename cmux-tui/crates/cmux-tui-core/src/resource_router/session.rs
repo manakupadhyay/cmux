@@ -160,7 +160,7 @@ fn update_terminal_defaults(
             .idempotency_key
             .clone()
             .expect("validated mutations have an idempotency key"),
-        "resource-api",
+        crate::actor::mutation_origin(),
     )
     .map_err(resource_operation_error)?;
     let fields = Value::Object(request.fields.clone());

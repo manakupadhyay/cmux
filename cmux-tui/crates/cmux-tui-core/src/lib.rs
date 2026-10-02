@@ -8,6 +8,7 @@
 //! [`MuxEvent`]s and read surface state; they never own terminal state
 //! themselves, which is what makes the backend attachable.
 
+mod actor;
 mod agent_hooks;
 mod apps;
 pub mod backoff;

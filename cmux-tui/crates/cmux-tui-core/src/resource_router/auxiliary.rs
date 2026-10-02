@@ -568,7 +568,7 @@ fn mutation(request: &ParsedResourceRequest) -> Result<WorkspaceMutation, Resour
             .idempotency_key
             .clone()
             .expect("catalog-validated mutations have an idempotency key"),
-        "resource-api",
+        crate::actor::mutation_origin(),
     )
     .map_err(resource_operation_error)
 }

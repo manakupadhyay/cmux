@@ -1098,16 +1098,19 @@
           runHandler(event, record.handlers[event]);
       }
     }
-    g.__cmuxAppRunCommand = (exportName, argsJSON, cbId) => entry("command", () => {
+    g.__cmuxAppRunCommand = (exportName, argsJSON, cbId, gesture) => entry("command", () => {
       const fn = exportsOf()[exportName];
       const done = (ok, body) => state.native?.commandDone(cbId, ok, JSON.stringify(body ?? null));
       if (typeof fn !== "function")
         return done(false, { code: "export.missing", message: `the app does not export ${exportName}` });
       const failure = (e) => e instanceof CmuxError ? { code: e.code, message: e.message, details: e.details ?? null } : { code: "command.failed", message: describe(e) };
+      state.gesture = typeof gesture === "string" ? gesture : null;
       try {
-        const r = fn(JSON.parse(argsJSON || "{}"), { app: state.app });
+        const r = fn(JSON.parse(argsJSON || "{}"), { app: state.app, gesture: state.gesture });
+        state.gesture = null;
         Promise.resolve(r).then((v) => done(true, { value: v ?? null }), (e) => done(false, failure(e)));
       } catch (e) {
+        state.gesture = null;
         done(false, failure(e));
       }
     }, undefined);

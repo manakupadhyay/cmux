@@ -134,19 +134,24 @@ function install() {
       }
   }
 
-  g.__cmuxAppRunCommand = (exportName: string, argsJSON: string, cbId: number) =>
+  g.__cmuxAppRunCommand = (exportName: string, argsJSON: string, cbId: number, gesture?: string | null) =>
     entry("command", () => {
       const fn = exportsOf()[exportName]
       const done = (ok: boolean, body: unknown) => state.native?.commandDone(cbId, ok, JSON.stringify(body ?? null))
       if (typeof fn !== "function") return done(false, { code: "export.missing", message: `the app does not export ${exportName}` })
       const failure = (e: unknown) => (e instanceof CmuxError ? { code: e.code, message: e.message, details: e.details ?? null } : { code: "command.failed", message: describe(e) })
+      // A user invocation (palette, keybinding) attests itself with a gesture
+      // token, ambient only while the command runs synchronously.
+      state.gesture = typeof gesture === "string" ? gesture : null
       try {
-        const r = fn(JSON.parse(argsJSON || "{}"), { app: state.app })
+        const r = fn(JSON.parse(argsJSON || "{}"), { app: state.app, gesture: state.gesture })
+        state.gesture = null
         Promise.resolve(r).then(
           (v) => done(true, { value: v ?? null }),
           (e) => done(false, failure(e))
         )
       } catch (e) {
+        state.gesture = null
         done(false, failure(e))
       }
     }, undefined)

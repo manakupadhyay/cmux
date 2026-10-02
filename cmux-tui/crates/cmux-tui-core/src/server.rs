@@ -7991,7 +7991,12 @@ fn handle_resource_connection_message(
                 !crate::resource_router::requires_connection_context(request.envelope.operation),
                 "connection-owned operation fell through to the transport-independent router"
             );
-            match crate::resource_router::handle_parsed_resource_request(mux, request) {
+            // The connection stamps who acts; the caller cannot (crate::actor).
+            let actor = crate::actor::Actor::of_client(mux, client);
+            let handled = crate::actor::scoped(actor, || {
+                crate::resource_router::handle_parsed_resource_request(mux, request)
+            });
+            match handled {
                 Ok(response) => writer.send_control(&response).is_ok(),
                 Err(error) => {
                     let response =

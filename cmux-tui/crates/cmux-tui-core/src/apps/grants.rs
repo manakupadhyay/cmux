@@ -158,6 +158,9 @@ struct Token {
 #[derive(Default)]
 pub struct Gestures {
     tokens: HashMap<String, Token>,
+    /// Client tokens of palette/keybinding invocations already honored, so
+    /// one invocation yields one gesture.
+    client_seen: HashMap<String, Instant>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -187,6 +190,20 @@ impl Gestures {
             Token { app: app.to_string(), expires: now + GESTURE_TTL, spent: false },
         );
         token
+    }
+
+    /// A user invocation from a client (palette, keybinding) presents its own
+    /// token; the supervisor answers with a gesture of its own minting, once
+    /// per client token. Malformed or reused tokens get none.
+    pub fn accept_client(&mut self, app: &str, client_token: &str, now: Instant) -> Option<String> {
+        let well_formed = (8..=128).contains(&client_token.len())
+            && client_token.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_');
+        self.client_seen.retain(|_, at| *at + GESTURE_TTL > now);
+        if !well_formed || self.client_seen.contains_key(client_token) || self.client_seen.len() >= MAX_GESTURES {
+            return None;
+        }
+        self.client_seen.insert(client_token.to_string(), now);
+        Some(self.mint(app, now))
     }
 
     /// Presents `token` for `app`. A mutation spends it; a read does not.
