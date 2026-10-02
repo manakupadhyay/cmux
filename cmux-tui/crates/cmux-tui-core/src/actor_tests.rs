@@ -68,5 +68,8 @@ fn a_caller_cannot_send_an_actor() {
     let error = crate::resource_router::parse_resource_request(&request.to_string())
         .err()
         .expect("an envelope with actor is refused");
-    assert!(format!("{error:?}").contains("actor"), "{error:?}");
+    assert_eq!(error.code, "validation.invalid");
+    let mut without = request;
+    without.as_object_mut().unwrap().remove("actor");
+    assert!(crate::resource_router::parse_resource_request(&without.to_string()).is_ok());
 }
